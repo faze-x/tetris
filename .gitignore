@@ -1,4 +1,5 @@
 *.exe
-raw assets/**
+raw assets/
 tetris copy.h
-.vscode/**
+.vscode/
+.gitignore
