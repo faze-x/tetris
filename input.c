@@ -15,6 +15,33 @@ void UpdateActiveTetromino()
     active.rotateTime += GetFrameTime();
     active.moveTime += GetFrameTime();
 
+    // gravity
+    bool floorCollision = CheckCollisionAt(active.positionInGrid.x, active.positionInGrid.y + 1, active.tetro.cellPositions);
+    if (active.fallTime >= active.dropSpeed)
+    {
+        if (!floorCollision)
+        {
+            active.positionInGrid.y += 1; // fall by 1 row
+        }
+        active.fallTime = 0;
+    }
+
+    // hard drop
+    if (IsKeyReleased(KEY_SPACE))
+    {
+        while (!CheckCollisionAt(
+            active.positionInGrid.x,
+            active.positionInGrid.y + 1,
+            active.tetro.cellPositions))
+        {
+            active.positionInGrid.y++;
+        }
+        // screen shake
+        shakeTimer = 0.2f;
+        SetSoundPitch(hardDropSFX, ((float)rand() / RAND_MAX) * 0.2 + 0.9);
+        PlaySound(hardDropSFX);
+    }
+
     // rotation
     bool rotate = false;
     if (IsKeyDown(KEY_UP))
@@ -49,33 +76,6 @@ void UpdateActiveTetromino()
     if (IsKeyReleased(KEY_DOWN) && active.dropSpeed >= DROP_SPEED_MINIMUM)
         active.dropSpeed -= DROP_SPEED_DECREMENT;
     // printf("%f\n", active.dropSpeed);
-
-    // hard drop
-    if (IsKeyReleased(KEY_SPACE))
-    {
-        while (!CheckCollisionAt(
-            active.positionInGrid.x,
-            active.positionInGrid.y + 1,
-            active.tetro.cellPositions))
-        {
-            active.positionInGrid.y++;
-        }
-        // screen shake
-        shakeTimer = 0.2f;
-        SetSoundPitch(hardDropSFX, ((float)rand() / RAND_MAX) * 0.2 + 0.9);
-        PlaySound(hardDropSFX);
-    }
-
-    // gravity
-    bool floorCollision = CheckCollisionAt(active.positionInGrid.x, active.positionInGrid.y + 1, active.tetro.cellPositions);
-    if (active.fallTime >= active.dropSpeed)
-    {
-        if (!floorCollision)
-        {
-            active.positionInGrid.y += 1; // fall by 1 row
-        }
-        active.fallTime = 0;
-    }
 
     // lock delay
     bool grounded = CheckCollisionAt(

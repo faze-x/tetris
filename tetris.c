@@ -8,6 +8,8 @@
 // 5. game states- game over, menu, playing - next
 // 6. animations for line clear, etc and also background
 
+// **** VISUAL BUG: remove padding for non existent upper border for the playfield
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <raylib.h>
