@@ -1,0 +1,4 @@
+*.exe
+raw assets/**
+tetris copy.h
+.vscode/**
