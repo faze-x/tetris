@@ -25,6 +25,7 @@ int main(void)
 {
     srand(time(NULL));
 
+    SetConfigFlags(FLAG_WINDOW_HIGHDPI); // for stupid ass scaling issues
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tetoris");
     InitAudioDevice();
 
