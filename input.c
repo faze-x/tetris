@@ -7,100 +7,159 @@
 #include "render.h"
 #include "audio.h"
 
-static int lockFrames = 0;
+static float lockTimer = 0;
+InputState input;
 
-void UpdateActiveTetromino()
+void PollInput()
 {
-    active.fallTime += GetFrameTime();
-    active.rotateTime += GetFrameTime();
-    active.moveTime += GetFrameTime();
+    input.leftHeld = IsKeyDown(KEY_LEFT);
+    input.rightHeld = IsKeyDown(KEY_RIGHT);
+    input.leftPressed = IsKeyPressed(KEY_LEFT);
+    input.rightPressed = IsKeyPressed(KEY_RIGHT);
 
-    // gravity
-    bool floorCollision = CheckCollisionAt(active.positionInGrid.x, active.positionInGrid.y + 1, active.tetro.cellPositions);
-    if (active.fallTime >= active.dropSpeed)
-    {
-        if (!floorCollision)
-        {
-            active.positionInGrid.y += 1; // fall by 1 row
-        }
-        active.fallTime = 0;
-    }
+    if (input.leftHeld && !input.rightHeld)
+        input.moveDir = -1;
+    else if (input.rightHeld && !input.leftHeld)
+        input.moveDir = 1;
+    else
+        input.moveDir = 0;
 
-    // hard drop
-    if (IsKeyReleased(KEY_SPACE))
-    {
-        while (!CheckCollisionAt(
-            active.positionInGrid.x,
-            active.positionInGrid.y + 1,
-            active.tetro.cellPositions))
-        {
-            active.positionInGrid.y++;
-        }
-        // screen shake
-        shakeTimer = 0.2f;
-        SetSoundPitch(hardDropSFX, ((float)rand() / RAND_MAX) * 0.2 + 0.9);
-        PlaySound(hardDropSFX);
-    }
+    input.downHeld = IsKeyDown(KEY_DOWN);
 
-    // rotation
-    bool rotate = false;
-    if (IsKeyDown(KEY_UP))
-        rotate = true;
+    input.rotatePressed = IsKeyPressed(KEY_UP);
+    input.hardDropPressed = IsKeyPressed(KEY_SPACE);
 
-    if (rotate && active.rotateTime >= 0.2)
-    {
-        TryRotateActive();
-        rotate = false;
-        active.rotateTime = 0;
+}
 
-        lockFrames = 0;
-    }
-
-    // left right movement
-    int move = 0;
-    if (IsKeyDown(KEY_LEFT))
-        move = -1;
-    if (IsKeyDown(KEY_RIGHT))
-        move = 1;
-
-    bool wallCollision = CheckCollisionAt(active.positionInGrid.x + move, active.positionInGrid.y, active.tetro.cellPositions);
-    if (abs(move) == 1 && !wallCollision && active.moveTime >= 0.15)
-    {
-        active.positionInGrid.x += move; // move by 1 cell
-        active.moveTime = 0;
-
-        lockFrames = 0;
-    }
-
-    // soft drop (no cooldown cause i cant bother)
-    if (IsKeyReleased(KEY_DOWN) && active.dropSpeed >= DROP_SPEED_MINIMUM)
-        active.dropSpeed -= DROP_SPEED_DECREMENT;
-    // printf("%f\n", active.dropSpeed);
-
-    // lock delay
-    bool grounded = CheckCollisionAt(
+void HandleHardDrop()
+{
+    while (!CheckCollisionAt(
         active.positionInGrid.x,
         active.positionInGrid.y + 1,
-        active.tetro.cellPositions);
-
-    if (grounded)
+        active.tetro.cellPositions))
     {
-        lockFrames++;
+        active.positionInGrid.y++;
+    }
+    // screen shake
+    shakeTimer = 0.2f;
+    SetSoundPitch(hardDropSFX, ((float)rand() / RAND_MAX) * 0.2 + 0.9);
+    PlaySound(hardDropSFX);
+}
 
-        if (lockFrames >= LOCK_DELAY_FRAMES)
+void HandleMovement(float dt)
+{
+    // tap movement
+    if (input.leftPressed)
+    {
+        TryMove(-1);
+        input.dasTimer = 0;
+        input.arrTimer = 0;
+    }
+
+    if (input.rightPressed)
+    {
+        TryMove(1);
+        input.dasTimer = 0;
+        input.arrTimer = 0;
+    }
+
+    // hold movement
+    if (input.moveDir != 0)
+    {
+        input.dasTimer += dt;
+
+        if (input.dasTimer >= DAS_DELAY)
         {
-            LockActivePiece();
-            SpawnNewPiece();
-            lockFrames = 0;
+            input.arrTimer += dt;
+
+            while (input.arrTimer >= ARR_DELAY)
+            {
+                TryMove(input.moveDir);
+                input.arrTimer -= ARR_DELAY;
+            }
         }
     }
     else
     {
-        lockFrames = 0;
+        input.dasTimer = 0;
+        input.arrTimer = 0;
     }
 }
 
-void TryRotateActive()
+void HandleSoftDrop()
+{
+    if (input.downHeld)
+    {
+        active.dropSpeed = 0.05f;
+        if (active.fallTime > active.dropSpeed)
+            active.fallTime = active.dropSpeed; // prevent accumulated time from causing a jump
+    }
+    else
+    {
+        active.dropSpeed = DROP_SPEED;
+    }
+}
+
+void ApplyGravity()
+{
+    while (active.fallTime >= active.dropSpeed)
+    {
+        bool floorCollision = CheckCollisionAt(active.positionInGrid.x, active.positionInGrid.y + 1, active.tetro.cellPositions);
+        if (!floorCollision)
+        {
+            active.positionInGrid.y += 1; // fall by 1 row
+        }
+        active.fallTime -= active.dropSpeed;
+    }
+}
+
+void HandleLockDelay(float dt)
+{
+    bool grounded = CheckCollisionAt(
+        active.positionInGrid.x,
+        active.positionInGrid.y + 1,
+        active.tetro.cellPositions
+    );
+
+    if (grounded)
+    {
+        lockTimer += dt;
+
+        if (lockTimer >= (LOCK_DELAY_FRAMES / 60.0f))
+        {
+            LockActivePiece();
+            SpawnNewPiece();
+            lockTimer = 0;
+        }
+    }
+    else
+    {
+        lockTimer = 0;
+    }
+}
+
+void UpdateActiveTetromino()
+{
+    float dt = GetFrameTime();
+    active.fallTime += GetFrameTime();
+    active.rotateTime += GetFrameTime();
+    //     active.moveTime += GetFrameTime();
+    PollInput();
+
+    if (input.hardDropPressed) HandleHardDrop();
+    if (input.rotatePressed && active.rotateTime > 0.2) TryRotate();
+
+    HandleMovement(dt);
+
+    HandleSoftDrop();
+
+    ApplyGravity();
+
+    HandleLockDelay(dt);
+}
+
+
+void TryRotate()
 {
     // check rotate collisions
     uint32_t rotatedPositions[4][4];
@@ -118,6 +177,17 @@ void TryRotateActive()
             memcpy(active.tetro.cellPositions, rotatedPositions, sizeof(rotatedPositions));
             return;
         }
+    }
+}
+
+void TryMove(int moveDir)
+{
+    bool wallCollision = CheckCollisionAt(active.positionInGrid.x + moveDir, active.positionInGrid.y, active.tetro.cellPositions);
+    if (!wallCollision)
+    {
+        active.positionInGrid.x += moveDir; // move by 1 cell
+
+        lockTimer = 0;
     }
 }
 

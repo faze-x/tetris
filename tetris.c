@@ -5,8 +5,9 @@
 // 2. split the code into separate files - done
 // 3. make it look prettier with pre drawn sprites - workinprogress
 // 4. sound effects and a bgm - (2/?)
-// 5. game states- game over, menu, playing - next
-// 6. animations for line clear, etc and also background
+// 5  improve input handling, make it more responsive....... DONE
+// 6. game states- game over, menu, playing - next
+// 7. animations for line clear, etc and also background
 
 // **** VISUAL BUG: remove padding for non existent upper border for the playfield
 
@@ -30,6 +31,7 @@ int main(void)
     InitAudioDevice();
 
     LoadAudio();
+
     // load textures
     LoadBlockTextures();
     LoadPlayfieldTexture();
@@ -45,7 +47,7 @@ int main(void)
     // active tetro
     SpawnNewPiece();
 
-    SetTargetFPS(60);
+    SetTargetFPS(FRAME_RATE);
 
     while (!WindowShouldClose())
     {

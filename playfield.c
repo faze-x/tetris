@@ -102,7 +102,6 @@ void SpawnNewPiece()
 {
     active.fallTime = 0;
     active.rotateTime = 0;
-    active.moveTime = 0;
     active.dropSpeed = DROP_SPEED;
 
     active.positionInGrid.x = PLAYFIELD_WIDTH / 2 - 2; // centered

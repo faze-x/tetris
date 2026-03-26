@@ -35,8 +35,8 @@ typedef struct
 
     float fallTime;
     float rotateTime;
-    float moveTime;
     float dropSpeed;
+
 } ActiveTetromino;
 
 extern Tetromino tetrominos[7];
@@ -48,7 +48,7 @@ extern ActiveTetromino active;
 Tetromino MakeTetromino(TetrominoType type, const uint32_t src[4][4]);
 void InitTetrominos();
 
-void ShuffleBag(TetrominoType *bag);
+void ShuffleBag(TetrominoType* bag);
 void AddBagToQueue();
 TetrominoType PopQueue();
 
