@@ -40,11 +40,11 @@ int main(void)
 
     // make tetromino variables
     InitTetrominos();
-    InitPlayfield();
 
     StartBGM();
 
-    // active tetro
+    // start game
+    InitPlayfield();
     SpawnNewPiece();
 
     SetTargetFPS(FRAME_RATE);

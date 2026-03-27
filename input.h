@@ -37,7 +37,7 @@ void HandleLockDelay(float dt);
 
 void UpdateActiveTetromino();
 void TryRotate();
-void TryMove();
+void TryMove(int inputDir);
 void RotateTetroPositions(uint32_t rotatedPositions[4][4], const uint32_t tetroPositions[4][4]);
 
 #endif
