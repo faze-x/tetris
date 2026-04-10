@@ -1,5 +1,5 @@
-// windows: gcc -Wall -Wextra -o tetris tetris.c tetromino.c render.c playfield.c input.c -lraylib -lopengl32 -lgdi32 -lwinmm -lm
-// linux:   gcc -Wall -Wextra -o tetris tetris.c tetromino.c render.c playfield.c input.c -lraylib -lm
+// windows: gcc -Wall -Wextra -o tetris tetris.c tetromino.c render.c playfield.c input.c gamestate.c -lraylib -lopengl32 -lgdi32 -lwinmm -lm
+// linux:   gcc -Wall -Wextra -o tetris tetris.c tetromino.c render.c playfield.c input.c gamestate.c -lraylib -lm
 // TODO
 // 1. add lock delay - done
 // 2. split the code into separate files - done
@@ -21,6 +21,7 @@
 #include "playfield.h"
 #include "input.h"
 #include "audio.h"
+#include "gamestate.h"
 
 int main(void)
 {
@@ -37,6 +38,7 @@ int main(void)
     LoadPlayfieldTexture();
     LoadBackgroundTextures(backgroundTextures, &numBackgroundTextures);
     LoadAnimatedBackgroundTextures();
+    LoadMenuTextures();
 
     // make tetromino variables
     InitTetrominos();
@@ -44,33 +46,73 @@ int main(void)
     StartBGM();
 
     // start game
-    InitPlayfield();
-    SpawnNewPiece();
+    StartGame();
 
     SetTargetFPS(FRAME_RATE);
 
+    currentGameState = STATE_MENU;
     while (!WindowShouldClose())
     {
         BeginDrawing();
         UpdateBGM();
 
-        if (!gameOver)
-        {
+        switch (currentGameState) {
+
+        case STATE_MENU:
+            DrawAnimatedBackground();
+
+            DrawMenu();
+            HandleGameOver();
+            // handlemenu()
+            break;
+
+        case STATE_PLAYING:
             UpdateScreenShake();
             UpdateActiveTetromino();
             HandleLineClears();
-        }
 
-        // DrawBackground(backgroundTextures, numBackgroundTextures); // static bg
-        DrawAnimatedBackground();
-        DrawPlayfield();
-        DrawShadowPiece();
-        DrawActiveTetromino();
+            // DrawBackground(backgroundTextures, numBackgroundTextures); // static bg
+            DrawAnimatedBackground();
+            DrawPlayfield();
+            DrawShadowPiece();
+            DrawActiveTetromino();
+            break;
 
-        if (gameOver)
-        {
+        case STATE_OVER:
+            // DrawBackground(backgroundTextures, numBackgroundTextures); // static bg
+            DrawAnimatedBackground();
+            DrawPlayfield();
+            DrawShadowPiece();
+            DrawActiveTetromino();
+
             DrawGameOver();
+            HandleGameOver();
+            break;
+
+        case STATE_PAUSED:
+            break;
+
+        default:
+            exit(-1);
+
         }
+        // if (currentGameState != STATE_OVER)
+        // {
+        //     UpdateScreenShake();
+        //     UpdateActiveTetromino();
+        //     HandleLineClears();
+        // }
+
+        // // DrawBackground(backgroundTextures, numBackgroundTextures); // static bg
+        // DrawAnimatedBackground();
+        // DrawPlayfield();
+        // DrawShadowPiece();
+        // DrawActiveTetromino();
+
+        // if (currentGameState == STATE_OVER)
+        // {
+        //     DrawGameOver();
+        // }
 
         EndDrawing();
     }

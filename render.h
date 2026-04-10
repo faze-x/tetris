@@ -38,12 +38,14 @@ void LoadBlockTextures();
 void LoadPlayfieldTexture();
 void LoadBackgroundTextures(Texture* textures, int* num_textures);
 void LoadAnimatedBackgroundTextures();
+void LoadMenuTextures();
 
 void DrawBackground(Texture* textures, int num_textures);
 void DrawAnimatedBackground();
 void DrawActiveTetromino();
 void DrawShadowPiece();
 void DrawPlayfield();
+void DrawMenu();
 void DrawGameOver();
 
 void UpdateScreenShake();

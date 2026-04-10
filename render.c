@@ -8,6 +8,10 @@
 #include "tetromino.h"
 #include "playfield.h"
 
+Texture2D textureMenuTitle;
+Texture2D textureMenuTeto;
+
+
 Texture2D textureBlockSkyblue;
 Texture2D textureBlockBlue;
 Texture2D textureBlockOrange;
@@ -83,6 +87,15 @@ void LoadAnimatedBackgroundTextures()
     animatedBg4 = LoadTexture("textures/anim_background/2/Night/4.png");
     animatedBg5 = LoadTexture("textures/anim_background/2/Night/5.png");
 }
+
+void LoadMenuTextures()
+{
+    textureMenuTeto = LoadTexture("textures/teto.png");
+    textureMenuTitle = LoadTexture("textures/title.png");
+}
+
+
+// draw
 
 void DrawBackground(Texture* textures, int num_textures)
 {
@@ -235,9 +248,47 @@ void DrawPlayfield()
 
 void DrawGameOver()
 {
-    const char* text = "GAME OVER";
-    int textWidth = MeasureText(text, FONT_SIZE);
-    DrawText(text, WINDOW_WIDTH / 2 - textWidth / 2, WINDOW_HEIGHT / 2, FONT_SIZE, WHITE);
+    const char* gameOverText = "GAME OVER";
+    int gameOverTextWidth = MeasureText(gameOverText, FONT_SIZE);
+    DrawText(gameOverText, WINDOW_WIDTH / 2 - gameOverTextWidth / 2, WINDOW_HEIGHT / 2, FONT_SIZE, WHITE);
+
+    const char* restartText = "Restart? (r)";
+    int restartTextWidth = MeasureText(restartText, FONT_SIZE / 2);
+    DrawText(restartText, WINDOW_WIDTH / 2 - restartTextWidth / 2, WINDOW_HEIGHT / 2 + FONT_SIZE, FONT_SIZE / 2, WHITE);
+}
+
+void DrawMenu()
+{
+    float titleX = (WINDOW_WIDTH / 2 - TITLE_WIDTH / 2);
+    float titleY = (WINDOW_HEIGHT / 3.67 - TITLE_HEIGHT / 2);
+
+    Rectangle sourceTitle = { 0, 0,textureMenuTitle.width,textureMenuTitle.height };
+    Rectangle destTitle = { titleX, titleY, TITLE_WIDTH, TITLE_HEIGHT };
+    Vector2 origin = { 0, 0 };
+
+    float padding = 30;
+    Rectangle destBg = {
+        titleX + destTitle.width / 2,   // center x
+        titleY + destTitle.height / 2,  // center y
+        destTitle.width + padding * 2,
+        destTitle.height + padding * 2
+    };
+
+
+    // DrawRectanglePro(destBg, (Vector2) { destBg.width / 2, destBg.height / 2 }, 0, (Color) { 80, 65, 80, 180 });
+
+    // draw title
+    DrawTexturePro(textureMenuTitle, sourceTitle, destTitle, origin, 0, (Color) { 240, 220, 255, 255 });
+
+    // draw teto
+    Rectangle sourceTeto = { 0, 0,textureMenuTeto.width,textureMenuTeto.height };
+    Rectangle destTeto = { destTitle.x + destTitle.width * 0.85, destTitle.y + destTitle.height * 0.3, destTitle.width / 4, destTitle.height / 1.3 };
+    DrawTexturePro(textureMenuTeto, sourceTeto, destTeto, origin, 0, (Color) { 255, 255, 255, 255 });
+
+    // draw text
+    const char* restartText = "Start? (r)";
+    int restartTextWidth = MeasureText(restartText, FONT_SIZE / 2);
+    DrawText(restartText, WINDOW_WIDTH / 2 - restartTextWidth / 2, WINDOW_HEIGHT / 2 + FONT_SIZE, FONT_SIZE / 2, WHITE);
 }
 
 void UpdateScreenShake()

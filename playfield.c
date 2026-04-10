@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include "playfield.h"
 #include "tetromino.h"
+#include "gamestate.h"
 
 PlayfieldCell playfieldGrid[PLAYFIELD_HEIGHT][PLAYFIELD_WIDTH];
-bool gameOver = false;
 
 void InitPlayfield()
 {
@@ -113,7 +113,7 @@ void SpawnNewPiece()
 
     if (CheckCollisionAt(active.positionInGrid.x, active.positionInGrid.y + 2, active.tetro.cellPositions))
     {
-        gameOver = true;
+        currentGameState = STATE_OVER;
     }
 }
     

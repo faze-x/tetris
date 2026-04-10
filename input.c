@@ -6,6 +6,7 @@
 #include "playfield.h"
 #include "render.h"
 #include "audio.h"
+#include "gamestate.h"
 
 static float lockTimer = 0;
 InputState input;

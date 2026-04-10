@@ -17,10 +17,16 @@
 // ------------------ movement ------------------
 // after how many ms the tetro moves 1 block down
 #define DROP_SPEED 0.6f
-#define DAS_DELAY 0.15f   // delay before repeat starts (in s)
-#define ARR_DELAY 0.05f   // repeat speed (in s)
+#define DAS_DELAY 0.15f   // delay before continuous movement starts (in s)
+#define ARR_DELAY 0.05f   // continuous movement delay (in s)
 #define LOCK_DELAY_FRAMES 15
 // ----------------------------------------------
+
+// ------------------ menu ------------------
+#define TITLE_WIDTH (float)(WINDOW_WIDTH / 2.0f)
+#define TITLE_HEIGHT (float)(WINDOW_HEIGHT / 3.67f)
+// ------------------------------------------
+
 
 // ------------------ spawn bag ------------------
 #define PIECE_QUEUE_SIZE 14

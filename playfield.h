@@ -12,7 +12,6 @@ typedef struct
 } PlayfieldCell;
 
 extern PlayfieldCell playfieldGrid[PLAYFIELD_HEIGHT][PLAYFIELD_WIDTH];
-extern bool gameOver;
 
 void InitPlayfield();
 bool CheckCollisionAt(int x, int y, const uint32_t tetroPositions[4][4]); // grid position x y
